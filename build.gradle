@@ -1,0 +1,27 @@
+plugins {
+    id "java"
+    id "java-library"
+}
+
+repositories {
+    maven {
+        url maven_url
+    }
+}
+
+group = 'com.sherlocky'
+version = '0.0.1'
+description = "leetcode"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation 'com.alibaba:fastjson:1.2.62'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation 'junit:junit:4.12'
+}
