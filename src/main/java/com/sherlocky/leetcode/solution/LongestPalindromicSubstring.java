@@ -52,7 +52,7 @@ public class LongestPalindromicSubstring {
     }
 
     public String longestPalindrome(String s) {
-        return longestPalindrome_4(s);
+        return longestPalindrome_5(s);
     }
 
     /**
@@ -283,11 +283,81 @@ public class LongestPalindromicSubstring {
         return right - left - 1;
     }
 
+    /**
+     * (耗费了很多脑细胞，实在没看懂，先跳过。。。)
+     * 【解法五 Manacher's Algorithm 马拉车算法】
+     * 马拉车算法 Manacher‘s Algorithm 是用来查找一个字符串的最长回文子串的线性方法，
+     * 由一个叫Manacher的人在1975年发明的，这个方法的最大贡献是在于将时间复杂度提升到了线性。
+     * <p>
+     * https://leetcode.wang/leetCode-5-Longest-Palindromic-Substring.html
+     * http://ju.outofmemory.cn/entry/130005
+     * https://segmentfault.com/a/1190000008484167
+     * <p>
+     *【时间复杂度】：O（n）
+     *【空间复杂度】：O（n）
+     * @param s
+     * @return
+     */
     public String longestPalindrome_5(String s) {
         if (StringUtils.isBlank(s)) {
             return null;
         }
+        String newStr = preProcess(s);
+        int newLen = newStr.length();
+        // P[i]代表从i位置为中心可扩展的最大长度
+        int[] P = new int[newLen];
+        // 回文串的中心位置
+        int center = 0;
+        // 回文串的右边界
+        int rightBorder = 0;
+        // rightBorder = center + P[ i ] 。center 和 rightBorder 所对应的回文串是当前循环中 rightBorder 最靠右的回文串。
+        for (int i = 1; i < newLen - 1; i++) {
+            // i 位置相对于center的对称位置
+            int i_mirror = 2 * center - i;
+            if (rightBorder > i) {
+                // 防止超出 rightBorder
+                P[i] = Math.min(rightBorder - i, P[i_mirror]);
+            } else {
+                // 等于 rightBorder 的情况
+                P[i] = 0;
+            }
+            /**
+             * 碰到之前讲的三种情况时候，需要利用中心扩展法
+             * 1.超出了 rightBorder
+             * 2.P [ i_mirror ] 遇到了原字符串的左边界
+             * 3.i 等于了 rightBorder
+             */
+            // 一步一步的求出每个 P [ i ]
+            while (newStr.charAt(i + 1 + P[i]) == newStr.charAt(i - 1 - P[i])) {
+                P[i]++;
+            }
+            /**
+             * 判断是否需要更新 rightBorder
+             * 当求出的 P [ i ] 的右边界大于当前的 rightBorder 时，我们就需要更新 center 和 rightBorder 为当前的回文串了。
+             * 因为我们必须保证 i 在 rightBorder 里面，所以一旦有更右边的 rightBorder 就要更新 rightBorder。
+             */
+            if (i + P[i] > rightBorder) {
+                center = i;
+                rightBorder = i + P[i];
+            }
+        }
+        // 找出 P 的最大值
+        int maxLen = 0;
+        int centerIndex = 0;
+        for (int i = 1; i < newLen - 1; i++) {
+            if (P[i] > maxLen) {
+                maxLen = P[i];
+                centerIndex = i;
+            }
+        }
+        // 用 P 的下标 i 减去 P [ i ]，再除以 2 ，就是原字符串的开头下标了
+        int start = (centerIndex - maxLen) / 2;
+        return s.substring(start, start + maxLen);
+    }
 
-        return null;
+    private String preProcess(String s) {
+        String ss = StringUtils.join(s.toCharArray(), '#');
+        ss = StringUtils.wrap(ss, '#');
+        return "^" + ss + "$";
     }
 }
